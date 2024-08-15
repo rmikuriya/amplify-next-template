@@ -1,5 +1,9 @@
 "use client";
 
+/*ログインUIの追加（下2行）*/
+import { Authenticator } from '@aws-amplify/ui-react'
+import '@aws-amplify/ui-react/styles.css'
+
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "@/amplify/data/resource";
@@ -30,14 +34,25 @@ export default function App() {
       content: window.prompt("Todo content"),
     });
   }
+  
+  /*delete関数追加*/
+  function deleteTodo(id: string){
+  	client.models.Todo.delete({ id })
+  }
 
   return (
+    /*ログインUIの追加*/
+    <Authenticator>
+      {({ signOut, user }) => (
+  
     <main>
       <h1>My todos</h1>
       <button onClick={createTodo}>+ new</button>
       <ul>
         {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
+          /*delete処理追加*/
+          <li onClick={() => deleteTodo(todo.id)}
+          key={todo.id}>{todo.content}</li>
         ))}
       </ul>
       <div>
@@ -47,6 +62,11 @@ export default function App() {
           Review next steps of this tutorial.
         </a>
       </div>
+     /*ログインUIの追加*/ 
+     <button onClick={signOut}>Sign out</button>
     </main>
+    )}
+    </Authenticator>
+    
   );
 }
