@@ -7,15 +7,21 @@ specifies that any user authenticated via an API key can "create", "read",
 "update", and "delete" any "Todo" records.
 =========================================================================*/
 const schema = a.schema({
-  Todo: a
-    .model({
+  Todo: a.model({
       content: a.string(),
+      /*ラベルの属性をスキーマに追加*/
+      label: a.string(),
+      //追加（仮）
+      //isDone: a.boolean()
     })
+    //allow.publicApiKey() rule designates that anyone authenticated using an API key can create, read, update, and delete todos.
     .authorization((allow) => [allow.publicApiKey()]),
 });
 
+// Used for code completion / highlighting when making requests from frontend
 export type Schema = ClientSchema<typeof schema>;
 
+// defines the data resource to be deployed
 export const data = defineData({
   schema,
   authorizationModes: {

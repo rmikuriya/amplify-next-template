@@ -14,14 +14,20 @@ import "@aws-amplify/ui-react/styles.css";
 
 Amplify.configure(outputs);
 
+// generate the data client 
 const client = generateClient<Schema>();
 
+/*ラベルの出力をするために記述？*/
+/*todos:状態値、setTodos:更新関数*/
 export default function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]["label"]>>([]);
+  /*const [labels, setlabels] = useState([]);*/
+
 
   function listTodos() {
     client.models.Todo.observeQuery().subscribe({
       next: (data) => setTodos([...data.items]),
+      /*next: (data) => setlabels([...data.items]),*/
     });
   }
 
@@ -31,8 +37,16 @@ export default function App() {
 
   function createTodo() {
     client.models.Todo.create({
-      content: window.prompt("Todo content"),
+      content: window.prompt("追加したいタスク"),
+      label: window.prompt("ラベルの種類"),
+      //追加（仮）
+      //isDone:false
     });
+
+    //追加（仮）
+    listTodos();
+        
+    /*.secondaryIndexes((index) => [index("txtlabel")])*/
   }
   
   /*delete関数追加*/
@@ -46,13 +60,14 @@ export default function App() {
       {({ signOut, user }) => (
   
     <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
+      <h1>Todoリストの追加</h1>
+      <button onClick={createTodo}>new task</button>
       <ul>
         {todos.map((todo) => (
           /*delete処理追加*/
           <li onClick={() => deleteTodo(todo.id)}
-          key={todo.id}>{todo.content}</li>
+          /*label表示追加*/
+          key={todo.id}>{todo.content}{todo.label}</li>
         ))}
       </ul>
       <div>
