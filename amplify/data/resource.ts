@@ -1,3 +1,5 @@
+//データバックエンドを構成する中心的な場所
+//バックエンドのデータモデルであるa.model()などを定義
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
 /*== STEP 1 ===============================================================
@@ -15,7 +17,12 @@ const schema = a.schema({
       //isDone: a.boolean()
     })
     //allow.publicApiKey() rule designates that anyone authenticated using an API key can create, read, update, and delete todos.
-    .authorization((allow) => [allow.publicApiKey()]),
+    // If you use a allow.publicApiKey() authorization rules for your data models, you need to use "apiKey" as an authorization mode.
+    //.authorization((allow) => [allow.publicApiKey()]),
+
+    //Per-user/per-owner data access
+    //to restrict a record's access to a specific user. When owner authorization is configured, only the record's owner is allowed the specified operations.
+    .authorization((allow) => [allow.owner()]),
 });
 
 // Used for code completion / highlighting when making requests from frontend
@@ -25,10 +32,11 @@ export type Schema = ClientSchema<typeof schema>;
 export const data = defineData({
   schema,
   authorizationModes: {
-    defaultAuthorizationMode: "apiKey",
+    /*defaultAuthorizationMode: "apiKey",
     apiKeyAuthorizationMode: {
       expiresInDays: 30,
-    },
+    },*/
+   defaultAuthorizationMode: 'userPool'
   },
 });
 

@@ -6,31 +6,37 @@ import '@aws-amplify/ui-react/styles.css'
 
 import { useState, useEffect } from "react";
 import { generateClient } from "aws-amplify/data";
+// Path to your backend resource definition
 import type { Schema } from "@/amplify/data/resource";
 import "./../app/app.css";
 import { Amplify } from "aws-amplify";
+//outputs.json file contains your API's endpoint information and auth configurations
 import outputs from "@/amplify_outputs.json";
 import "@aws-amplify/ui-react/styles.css";
 
 Amplify.configure(outputs);
 
 // generate the data client 
-const client = generateClient<Schema>();
+//定義されたスキーマに従ってDynamoDBとの連携（書き込み）が行われる
+const client = generateClient<Schema>({
+  //To apply the same authorization mode on all requests from a Data client, specify the "authMode" parameter on the "generateClient" function.
+  //authMode: 'apiKey'
+  //authMode: 'userPool'
+});
 
-/*ラベルの出力をするために記述？*/
 /*todos:状態値、setTodos:更新関数*/
 export default function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]["label"]>>([]);
+  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]/*["label"]*/>>([]);
   /*const [labels, setlabels] = useState([]);*/
 
 
   function listTodos() {
     client.models.Todo.observeQuery().subscribe({
       next: (data) => setTodos([...data.items]),
-      /*next: (data) => setlabels([...data.items]),*/
     });
   }
 
+  //コンポーネントを外部システムと同期
   useEffect(() => {
     listTodos();
   }, []);
@@ -42,6 +48,9 @@ export default function App() {
       //追加（仮）
       //isDone:false
     });
+    //userPoolの認証の場合はここに記載。
+    //Set authorization mode on the request-level?
+    authMode: 'userPool'
 
     //追加（仮）
     listTodos();
@@ -61,13 +70,14 @@ export default function App() {
   
     <main>
       <h1>Todoリストの追加</h1>
+      <h2>{user?.signInDetails?.loginId}</h2>
       <button onClick={createTodo}>new task</button>
       <ul>
         {todos.map((todo) => (
           /*delete処理追加*/
           <li onClick={() => deleteTodo(todo.id)}
           /*label表示追加*/
-          key={todo.id}>{todo.content}{todo.label}</li>
+          key={todo.id}>{todo.content}  [{todo.label}]</li>
         ))}
       </ul>
       <div>
